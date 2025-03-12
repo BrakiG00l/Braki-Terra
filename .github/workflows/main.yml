@@ -1,7 +1,7 @@
 name: Terraform Deploy
 
 on:
-  push:
+  pull_request: # Cambia a pull_request para que se ejecute en PRs
     branches:
       - main
 
@@ -17,6 +17,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
+      pull-requests: write # Agrega este permiso
 
     steps:
       - name: Checkout code
@@ -37,7 +38,24 @@ jobs:
       - name: Terraform validate
         run: terraform validate
       - name: Terraform plan
+        id: plan
         run: terraform plan
+        continue-on-error: true # Permite que el flujo de trabajo continúe incluso si terraform plan falla
+      - name: Comment Terraform Plan
+        uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        env:
+          PLAN: ${{ steps.plan.outputs.stdout }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Plan \`\`\`\n${process.env.PLAN}\`\`\``;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
       - name: Terraform Apply
         run: terraform apply
         if: github.ref == 'refs/heads/main'
