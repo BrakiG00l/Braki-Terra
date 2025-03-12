@@ -1,15 +1,22 @@
 name: Terraform Deploy
+
 on:
   push:
     branches:
       - main
+
 env:
   AWS_ROLE_ARN: arn:aws:iam::677276094967:role/git-role # Reemplaza con el ARN de tu rol
   AWS_REGION: us-east-1 # Reemplaza con tu región
+
 jobs:
   terraform:
     name: Terraform
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Agrega este permiso
+      contents: read # This is needed to checkout the repository
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
