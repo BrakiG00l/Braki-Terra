@@ -14,8 +14,8 @@ jobs:
     name: Terraform
     runs-on: ubuntu-latest
     permissions:
-      id-token: write # Agrega este permiso
-      contents: read # This is needed to checkout the repository
+      id-token: write
+      contents: read
 
     steps:
       - name: Checkout code
@@ -37,5 +37,6 @@ jobs:
         run: terraform validate
       - name: Terraform plan
         run: terraform plan
-      - name: Terraform apply
-        run: terraform apply -auto-approve
+      - name: Terraform Apply
+        run: terraform apply
+        if: github.ref == 'refs/heads/main'
